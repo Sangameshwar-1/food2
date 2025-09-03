@@ -1,0 +1,116 @@
+/* General styles */
+body {
+  font-family: Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f4f4f9;
+  color: #333;
+}
+
+/* Center the login container */
+.login-container {
+  max-width: 400px;
+  margin: 50px auto;
+  padding: 20px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+/* Heading styles */
+.login-container h2 {
+  margin-bottom: 20px;
+  color: #444;
+  font-size: 24px;
+}
+
+/* Input field styles */
+.login-container input {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  box-sizing: border-box;
+}
+
+/* Input focus styles */
+.login-container input:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Button styles */
+.login-container button {
+  width: 100%;
+  padding: 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+/* Button hover effect */
+.login-container button:hover {
+  background-color: #0056b3;
+}
+
+/* Error message styles */
+.error-message {
+  color: #d32f2f;
+  background: #f8d7da;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Success message styles */
+.success-message {
+  color: #388e3c;
+  background: #d4edda;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* Toggle link styles */
+.toggle-link {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+/* Toggle link hover effect */
+.toggle-link:hover {
+  color: #0056b3;
+}
+
+/* Responsive design */
+@media (max-width: 480px) {
+  .login-container {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .login-container h2 {
+    font-size: 20px;
+  }
+
+  .login-container input {
+    font-size: 14px;
+  }
+
+  .login-container button {
+    font-size: 14px;
+  }
+}
