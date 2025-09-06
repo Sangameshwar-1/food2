@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
+
 const { Donor } = require('../models/Donor');
 const { Volunteer } = require('../models/Volunteer');
-import User from "../models/User.js";
+import { User } from "../../src/models/User.js";
 const auth = require('../middleware/auth'); // JWT/session middleware
 
 // Get current user info

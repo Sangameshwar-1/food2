@@ -1,28 +1,31 @@
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
-import apiRoutes from "./routes/api.js"; // Authentication routes
-import donorRoutes from "./routes/donors.js"; // Donor-related routes
-import volunteerRoutes from "./routes/volunteers.js"; // Volunteer-related routes
+import apiRoutes from "./routes/api.js";
+import donorRoutes from "./routes/donors.js";
+import volunteerRoutes from "./routes/volunteers.js";
+import studentRoutes from "./routes/studentRoutes.js";
+import dotenv from "dotenv";
+dotenv.config();
+
+import cookieParser from "cookie-parser";
 
 const app = express();
+app.use(cookieParser()); // Add this middleware to parse cookies
 const PORT = process.env.PORT || 5000;
 
-// MongoDB connection
+// MongoDB connection (use environment variable)
 mongoose
-  .connect("mongodb://localhost:27017/food")
+  .connect(process.env.MONGODB_URI || "mongodb://localhost:27017/food")
   .then(() => console.log("Connected to MongoDB"))
   .catch((err) => console.error("MongoDB connection error:", err));
   
-// Middleware
 app.use(cors());
 app.use(express.json());
+app.use("/api/auth", apiRoutes); // Mount the routes with the prefix "/api/auth"
 
-// Routes
-app.use("/api/auth", apiRoutes); // Authentication routes (login, register, etc.)
-app.use("/api/donors", donorRoutes); // Donor routes (add donor, fetch donor, etc.)
-app.use("/api/volunteers", volunteerRoutes); // Volunteer routes (add volunteer, etc.)
+app.use("/api/donors", donorRoutes);
+app.use("/api/volunteers", volunteerRoutes);
+app.use("/api/students", studentRoutes);
 
-// Start the server
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-

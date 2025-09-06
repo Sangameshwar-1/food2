@@ -1,12 +1,10 @@
-const express = require("express");
-const { getStudents, createStudent } = require("../controllers/studentController");
+import express from "express";
 
 const router = express.Router();
 
-// Route to get all students
-router.get("/", getStudents);
+// Define your student-related routes here
+router.get("/", (req, res) => {
+  res.send("Student routes are working!");
+});
 
-// Route to create a new student
-router.post("/", createStudent);
-
-module.exports = router;
+export default router; // Ensure this is a default export
