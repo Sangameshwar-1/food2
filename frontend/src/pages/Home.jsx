@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Home.css";
 
-const Home = () => {
-  const [form, setForm] = useState({ email: "", password: "" });
+export default function Home() {
   const [isLogin, setIsLogin] = useState(true);
-  const [loading, setLoading] = useState(false);
+  const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -17,73 +17,63 @@ const Home = () => {
     e.preventDefault();
     setLoading(true);
     setError("");
-    setSuccess("");
-  
+
     try {
-      const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
       const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
-      const response = await fetch(`${API_URL}${endpoint}`, {
+      const res = await fetch(`http://localhost:5000${endpoint}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
-        credentials: "include", // Include cookies in the request
       });
-  
-      const data = await response.json();
-  
-      if (!response.ok) {
-        throw new Error(data.message || "Something went wrong");
-      }
-  
+
+      const data = await res.json();
+      console.log("Response from backend:", data); // Debugging response
+
+      if (!res.ok) throw new Error(data.message || "Authentication failed");
+
       if (isLogin) {
-        setSuccess("Login successful!");
-        localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.TOKEN); // Save the token (uppercase TOKEN)
         console.log("Token stored in localStorage:", localStorage.getItem("token")); // Debugging token storage
-        setForm({ email: data.email, password: "" });
-        navigate("../user");
-      } else {
-        setSuccess("Registration successful! Please login.");
-        setIsLogin(true);
+        navigate("/user");
       }
     } catch (err) {
-      console.error("Error:", err.message);
-      setError(err.message);
+      setError(err.message || "Network error occurred");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div>
-      <h1>{isLogin ? "Login" : "Register"}</h1>
+    <div className="login-container">
+      <h2>{isLogin ? "Login" : "Register"}</h2>
       <form onSubmit={handleSubmit}>
         <input
           type="email"
           name="email"
+          placeholder="Enter Email"
+          required
           value={form.email}
           onChange={handleChange}
-          placeholder="Email"
-          required
         />
         <input
           type="password"
           name="password"
+          placeholder="Enter Password"
+          required
           value={form.password}
           onChange={handleChange}
-          placeholder="Password"
-          required
         />
-        <button type="submit" disabled={loading}>
-          {loading ? "Loading..." : isLogin ? "Login" : "Register"}
+        <button type="submit" id="auth-button" disabled={loading}>
+          {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
         </button>
-        {error && <p style={{ color: "red" }}>{error}</p>}
-        {success && <p style={{ color: "green" }}>{success}</p>}
       </form>
-      <button onClick={() => setIsLogin(!isLogin)}>
-        {isLogin ? "Switch to Register" : "Switch to Login"}
-      </button>
+      {error && <div className="error-message" id="error-message">{error}</div>}
+      <div
+        className="toggle-link"
+        onClick={() => setIsLogin(!isLogin)}
+      >
+        {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
+      </div>
     </div>
   );
-};
-
-export default Home;
+}

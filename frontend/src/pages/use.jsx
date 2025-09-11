@@ -1,48 +1,79 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import "./UserPage.css";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./Home.css";
 
-const UserPage = () => {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+export default function Home() {
+  const [isLogin, setIsLogin] = useState(true);
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const token = localStorage.getItem("authToken"); // Retrieve token from local storage
-        if (!token) {
-          throw new Error("No authentication token found");
-        }
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
-        const res = await axios.get("http://localhost:5000/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`, // Include token in Authorization header
-          },
-        });
-        setUser(res.data);
-      } catch (err) {
-        console.error("Error fetching user:", err);
-      } finally {
-        setLoading(false);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const endpoint = isLogin ? "/api/auth/login" : "/api/auth/register";
+      const res = await fetch(`http://localhost:5000${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      const data = await res.json();
+      console.log("Response from backend:", data); // Debugging response
+
+      if (!res.ok) throw new Error(data.message || "Authentication failed");
+
+      if (isLogin) {
+        localStorage.setItem("token", data.TOKEN); // Save the token (uppercase TOKEN)
+        console.log("Token stored in localStorage:", localStorage.getItem("token")); // Debugging token storage
+        navigate("/user");
       }
-    };
-    fetchUser();
-  }, []);
-
-  if (loading) {
-    return <p>Loading...</p>;
-  }
-
-  if (!user) {
-    return <p>User not found</p>;
-  }
+    } catch (err) {
+      setError(err.message || "Network error occurred");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div>
-      <h1>Welcome, {user.name || "User"}!</h1>
-      <p>Email: {user.email}</p>
+    <div className="login-container">
+      <h2>{isLogin ? "Login" : "Register"}</h2>
+      <form onSubmit={handleSubmit}>
+        <input
+          type="email"
+          name="email"
+          placeholder="Enter Email"
+          required
+          value={form.email}
+          onChange={handleChange}
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Enter Password"
+          required
+          value={form.password}
+          onChange={handleChange}
+        />
+        <button type="submit" id="auth-button" disabled={loading}>
+          {loading ? "Processing..." : isLogin ? "Login" : "Sign Up"}
+        </button>
+      </form>
+      {error && <div className="error-message" id="error-message">{error}</div>}
+      <div
+        className="toggle-link"
+        onClick={() => setIsLogin(!isLogin)}
+      >
+        {isLogin ? "Don't have an account? Register" : "Already have an account? Login"}
+      </div>
     </div>
   );
-};
-
-export default UserPage;
+}
