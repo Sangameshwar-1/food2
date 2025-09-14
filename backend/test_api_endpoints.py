@@ -4,6 +4,14 @@ import json
 import sys
 
 BASE_URL = "http://localhost:5000/api"
+# Test categories
+# 1. General Endpoints
+#    - test_root
+#    - test_health
+# 2. Authentication Endpoints
+#    - test_registration
+#    - test_login
+#    - test_protected_endpoint
 
 def test_root():
     """Test root endpoint"""

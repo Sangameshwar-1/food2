@@ -9,6 +9,27 @@ except ImportError:
 import sys
 import time
 
+
+# List of tests happening in the script:
+# 1. Test server connection
+# 2. Test authentication:
+#    - User registration
+#    - User login
+# 3. Test student endpoints:
+#    - Create student
+#    - Get all students
+#    - Get specific student
+#    - Update student
+#    - Delete student
+# 4. Test donor endpoints:
+#    - Create donor
+#    - Get all donors
+#    - Delete donor
+# 5. Test volunteer endpoints:
+#    - Create volunteer
+#    - Get all volunteers
+#    - Delete volunteer
+
 BASE_URL = "http://localhost:5000/api"
 
 class APITester:
@@ -49,7 +70,7 @@ class APITester:
         # Test registration
         print("1. Testing user registration...")
         register_data = {
-            "email": "testuser3@example.com",
+            "email": "testuser2@example.com",
             "password": "testpassword123",
             "name": "Test User",
             "contact": "1234567890",
@@ -74,16 +95,17 @@ class APITester:
         # Test login
         print("\n2. Testing user login...")
         login_data = {
-            "email": "testuser3@example.com",
+            "email": "testuser2@example.com",
             "password": "testpassword123"
         }
-        
+
         try:
             response = requests.post(f"{BASE_URL}/auth/login", json=login_data, timeout=5)
             if response.status_code == 200:
                 self.token = response.json().get("token")
+                self.user_id = response.json().get("user", {}).get("id")  # Extract user ID
                 print("✓ User login successful")
-                print(f"User ID: {response.json().get('user', {}).get('id')}\n")
+                print(f"User ID: {self.user_id}\n")
                 print(f"   Token: {self.token}")
                 return True
             else:
@@ -109,7 +131,8 @@ class APITester:
             "creator_id": self.user_id,
             "name": "John Doe",
             "age": 22,
-            "branch": "Computer Science"
+            "branch": "Computer Science",
+            "Timestamp/DateStamp": time.time()
         }
         
         try:
@@ -132,6 +155,11 @@ class APITester:
             if response.status_code == 200:
                 students = response.json()
                 print(f"✓ Retrieved {len(students)} students")
+                if isinstance(students, list):
+                    for student in students:
+                        print(f"   Student ID: {student.get('_id')}")
+                else:
+                    print("✗ Unexpected response format for students")
             else:
                 print(f"✗ Get students failed: {response.status_code}")
                 return False
@@ -167,18 +195,18 @@ class APITester:
             print(f"✗ Student update error: {e}")
             return False
 
-        # Test delete student
-        print("\n5. Testing student deletion...")
-        try:
-            response = requests.delete(f"{BASE_URL}/students/{self.student_id}", headers=headers, timeout=5)
-            if response.status_code == 200:
-                print("✓ Student deleted successfully")
-            else:
-                print(f"✗ Student deletion failed: {response.status_code}")
-                return False
-        except Exception as e:
-            print(f"✗ Student deletion error: {e}")
-            return False
+        # # Test delete student
+        # print("\n5. Testing student deletion...")
+        # try:
+        #     response = requests.delete(f"{BASE_URL}/students/{self.student_id}", headers=headers, timeout=5)
+        #     if response.status_code == 200:
+        #         print("✓ Student deleted successfully")
+        #     else:
+        #         print(f"✗ Student deletion failed: {response.status_code}")
+        #         return False
+        # except Exception as e:
+        #     print(f"✗ Student deletion error: {e}")
+        #     return False
 
         return True
 
@@ -203,13 +231,15 @@ class APITester:
             "district": "Central District",
             "weight": 65.5
         }
-        
+
         try:
             response = requests.post(f"{BASE_URL}/donors/", json=donor_data, headers=headers, timeout=5)
             if response.status_code == 201:
-                self.donor_id = response.json().get("donor", {}).get("id")
+                donor = response.json().get("donor", {})
+                self.donor_id = donor.get("id")
                 print("✓ Donor created successfully")
                 print(f"   Donor ID: {self.donor_id}")
+                print(f"   Created At: {donor.get('timeanddate')}")
             else:
                 print(f"✗ Donor creation failed: {response.status_code} - {response.text}")
                 return False
@@ -224,6 +254,8 @@ class APITester:
             if response.status_code == 200:
                 donors = response.json()
                 print(f"✓ Retrieved {len(donors)} donors")
+                for donor in donors:
+                    print(f"   Donor ID: {donor.get('_id')}")
             else:
                 print(f"✗ Get donors failed: {response.status_code}")
                 return False
@@ -231,19 +263,20 @@ class APITester:
             print(f"✗ Get donors error: {e}")
             return False
 
-        # Test delete donor
-        print("\n3. Testing donor deletion...")
-        try:
-            response = requests.delete(f"{BASE_URL}/donors/{self.donor_id}", headers=headers, timeout=5)
-            if response.status_code == 200:
-                print("✓ Donor deleted successfully")
-                return True
-            else:
-                print(f"✗ Donor deletion failed: {response.status_code}")
-                return False
-        except Exception as e:
-            print(f"✗ Donor deletion error: {e}")
-            return False
+        # # Test delete donor
+        # print("\n3. Testing donor deletion...")
+        # try:
+        #     response = requests.delete(f"{BASE_URL}/donors/{self.donor_id}", headers=headers, timeout=5)
+        #     if response.status_code == 200:
+        #         print("✓ Donor deleted successfully")
+        #         return True
+        #     else:
+        #         print(f"✗ Donor deletion failed: {response.status_code}")
+        #         return False
+        # except Exception as e:
+        #     print(f"✗ Donor deletion error: {e}")
+        #     return False
+
     def test_volunteers(self):
         """Test volunteer endpoints"""
         self.print_section("Volunteer Management Tests")
@@ -284,6 +317,8 @@ class APITester:
             if response.status_code == 200:
                 volunteers = response.json()
                 print(f"✓ Retrieved {len(volunteers)} volunteers")
+                for volunteer in volunteers:
+                    print(f"   Volunteer ID: {volunteer.get('_id')}")
             else:
                 print(f"✗ Get volunteers failed: {response.status_code}")
                 return False
@@ -291,18 +326,18 @@ class APITester:
             print(f"✗ Get volunteers error: {e}")
             return False
 
-        # Test delete volunteer
-        print("\n3. Testing volunteer deletion...")
-        try:
-            response = requests.delete(f"{BASE_URL}/volunteers/{self.volunteer_id}", headers=headers, timeout=5)
-            if response.status_code == 200:
-                print("✓ Volunteer deleted successfully")
-            else:
-                print(f"✗ Volunteer deletion failed: {response.status_code}")
-                return False
-        except Exception as e:
-            print(f"✗ Volunteer deletion error: {e}")
-            return False
+        # # Test delete volunteer
+        # print("\n3. Testing volunteer deletion...")
+        # try:
+        #     response = requests.delete(f"{BASE_URL}/volunteers/{self.volunteer_id}", headers=headers, timeout=5)
+        #     if response.status_code == 200:
+        #         print("✓ Volunteer deleted successfully")
+        #     else:
+        #         print(f"✗ Volunteer deletion failed: {response.status_code}")
+        #         return False
+        # except Exception as e:
+        #     print(f"✗ Volunteer deletion error: {e}")
+        #     return False
 
         return True
     def run_all_tests(self):

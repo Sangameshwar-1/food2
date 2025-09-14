@@ -1,24 +1,32 @@
-from mongoengine import Document, StringField, ReferenceField, DateTimeField, FloatField
+from mongoengine import Document, StringField, DateTimeField, signals
+from datetime import datetime
+import pytz
 
 class Donor(Document):
-    user_id = ReferenceField('User', required=True)
     name = StringField(required=True)
-    dob = DateTimeField(required=True)
-    weight = FloatField(required=True)
-    blood_type = StringField(required=True)
-    contact = StringField(required=True)
-    address = StringField(required=True)
-    district = StringField(required=True)
-    
+    blood_type = StringField()
+    contact = StringField()
+    address = StringField()
+    district = StringField()
+    weight = StringField()
+    timeanddate = DateTimeField()  # Automatically updated on save
+
+    @classmethod
+    def pre_save(cls, sender, document, **kwargs):
+        """Update the timeanddate field before saving with Indian timezone."""
+        india_tz = pytz.timezone('Asia/Kolkata')
+        document.timeanddate = datetime.now(india_tz)
+
     def to_json(self):
         return {
             "id": str(self.id),
-            "user_id": str(self.user_id.id),
             "name": self.name,
-            "dob": self.dob.isoformat(),
-            "weight": self.weight,
             "blood_type": self.blood_type,
             "contact": self.contact,
             "address": self.address,
-            "district": self.district
+            "district": self.district,
+            "weight": self.weight,
+            "timeanddate": self.timeanddate.isoformat() if self.timeanddate else None
         }
+
+signals.pre_save.connect(Donor.pre_save, sender=Donor)

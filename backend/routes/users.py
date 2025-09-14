@@ -23,6 +23,7 @@ def serialize_document(doc):
             doc[key] = str(value)
     return doc
 
+#
 @users_bp.route('/details', methods=['POST'])
 @authenticate_token
 def add_user():

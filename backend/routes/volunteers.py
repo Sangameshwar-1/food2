@@ -1,8 +1,8 @@
 from flask import Blueprint, request, jsonify
-from config.database import mongo  # Import the mongo object
+from config.database import mongo
 from bson.objectid import ObjectId
 from flask_jwt_extended import jwt_required
-from models.volunteer import Volunteer
+from models.volunteer import Volunteer  # Import the model to trigger signals
 
 volunteers_bp = Blueprint('volunteers', __name__)
 
@@ -12,29 +12,30 @@ def serialize_document(doc):
     if not doc:
         return doc
     if "_id" in doc:
-        doc["id"] = str(doc["_id"])  # Add 'id' field with stringified ObjectId
-        doc["_id"] = str(doc["_id"])  # Keep '_id' field as string
+        doc["id"] = str(doc["_id"])
+        doc["_id"] = str(doc["_id"])
     return doc
-
 
 @volunteers_bp.route('/', methods=['POST'])
 @jwt_required()
 def create_volunteer():
     try:
         data = request.get_json()
+        
+        # Remove manual datetime handling - let the model handle it
         result = mongo.db.volunteers.insert_one(data)
         volunteer_id = str(result.inserted_id)
 
         volunteer = mongo.db.volunteers.find_one({"_id": ObjectId(volunteer_id)})
         volunteer = serialize_document(volunteer)
-
+        
         return jsonify({
             "message": "Volunteer created successfully",
             "volunteer": volunteer
         }), 201
     except Exception as e:
         return jsonify({"message": "Error creating volunteer", "error": str(e)}), 500
-    
+
 # Get all volunteers
 @volunteers_bp.route('/', methods=['GET'])
 @jwt_required()

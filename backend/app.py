@@ -7,6 +7,7 @@ from routes.donors import donor_bp
 from routes.volunteers import volunteers_bp
 from routes.users import users_bp
 from routes.students import student_bp
+from routes.graphql import graphql_bp  # Add this import
 from models import initialize_db
 
 
@@ -27,6 +28,7 @@ def create_app():
     app.register_blueprint(volunteers_bp, url_prefix='/api/volunteers')
     app.register_blueprint(users_bp, url_prefix='/api/users')
     app.register_blueprint(student_bp, url_prefix='/api/students')
+    app.register_blueprint(graphql_bp, url_prefix='/api')  # Add this line
 
     # Root endpoint
     @app.route('/')
